@@ -102,20 +102,16 @@ app.post("/login", async function(req, res) {
     const password = req.body.password;
     try {
         const foundUser = await User.findOne({ email: username });
-        if (foundUser && foundUser.password === password) {
+        if (foundUser && await bcrypt.compare(password, foundUser.password)) {
+
             res.render("secrets");
-            bcrypt.compare(password, foundUser.password).then(function(result) {
-                // result == true
 
-                if (result == true) {
-
-
-                    res.render("secrets");
-                }
-            });
+        } else {
+            res.status(401).send("Invalid login credentials");
         }
     } catch (err) {
         console.log(err);
+        res.status(500).send("Server error");
     }
 
 })
