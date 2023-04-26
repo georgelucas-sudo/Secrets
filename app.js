@@ -75,53 +75,21 @@ app.get("/submit", function(req, res) {
 // app.post("/register", async function(req, res) {})
 
 app.post("/register", async(req, res) => {
-
-    //add bcrypt 
+  try {
+    const saltRounds = 10;
     const hash = await bcrypt.hash(req.body.password, saltRounds);
-
-
-
-
-
-    // Store hash in your password DB.
     const newUser = new User({
-        email: req.body.username,
-        password: hash
+      email: req.body.username,
+      password: hash
     });
-
-
-
-
+    // save the new user to your database
     await newUser.save();
-    res.render("secrets");
-
-
-    // async function saveUser(newUser) {
-    //     try {
-    //         await newUser.save();
-    //         res.render("secrets");
-    //     } catch (err) {
-    //         console.log(err);
-    //     }
-
-    // }
-    // saveUser(newUser)
-    //     .then((viewName) => res.render(viewName))
-    //     .catch((err) => console.log(err));
-
-
-
-
-
-
-    // newUser.save(async function(err) {
-    //     if (err) {
-    //         console.log(err);
-    //     } else {
-    //         res.render("secrets");
-    //     }
-    // });
+    res.render("secrets")
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
 });
+
 app.post("/login", async function(req, res) {
 
     const username = req.body.username;
