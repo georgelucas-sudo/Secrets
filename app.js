@@ -65,50 +65,61 @@ app.get("/login", function(req, res) {
 
 app.get("/register", function(req, res) {
 
+
     res.render("register");
 });
 app.get("/submit", function(req, res) {
     res.render("submit");
 });
 
+app.get("/secrets", function(req, res) {
+    if (req.isAuthenticated()) {
+        res.render("secrets")
+
+    } else {
+        res.redirect("/login")
+    }
+})
+app.get("/logout", function(req, res) {
+    res.logout()
+    res.redirect("/")
+})
+
 
 // app.post("/register", async function(req, res) {})
 
 app.post("/register", async(req, res) => {
-  try {
-    const saltRounds = 10;
-    const hash = await bcrypt.hash(req.body.password, saltRounds);
-    const newUser = new User({
-      email: req.body.username,
-      password: hash
-    });
-    // save the new user to your database
-    await newUser.save();
-    res.render("secrets")
-  } catch (err) {
-    res.status(500).send(err.message);
-  }
+    User.register({ username: req.body.username }, req.body.password, function(err, user) {
+        if (err) {
+            console.log(err)
+        } else {
+            passport.authenticate("local")(req, res, function() {
+                res.redirect("/secrets");
+            })
+        }
+    })
 });
+
 
 app.post("/login", async function(req, res) {
 
-    const username = req.body.username;
-    const password = req.body.password;
-    try {
-        const foundUser = await User.findOne({ email: username });
-        if (foundUser && await bcrypt.compare(password, foundUser.password)) {
+    const user = new User({
+        username: req.body.username,
+        password: req.body.password
+    })
+    req.login(user, function(err) {
 
-            res.render("secrets");
-
+        if (err) {
+            console.log(err);
         } else {
-            res.status(401).send("Invalid login credentials");
+            passport.authenticate("local")(req, res, function() {
+                res.redirect("secrets");
+            })
         }
-    } catch (err) {
-        console.log(err);
-        res.status(500).send("Server error");
-    }
+    })
 
 })
+
 
 
 
