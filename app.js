@@ -7,11 +7,14 @@ const mongoose = require("mongoose");
 const session = require('express-session');
 
 
+
 const passport = require('passport');
 const passportLocalMongoose = require('passport-local-mongoose');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const findOrCreate = require('mongoose-findorcreate')
 
 const app = express();
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
+
 
 
 
@@ -61,7 +64,8 @@ console.log("Your API key is: " + process.env.API_KEY);
 passport.use(new GoogleStrategy({
         clientID: process.env.CLIENT_ID,
         clientSecret: process.env.CLIENT_SECRET,
-        callbackURL: "http://localhost:3000/auth/google/secrets"
+        callbackURL: "http://localhost:3000/auth/google/secrets",
+        userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
     },
     function(accessToken, refreshToken, profile, cb) {
         User.findOrCreate({ googleId: profile.id }, function(err, user) {
