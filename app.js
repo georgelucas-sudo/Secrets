@@ -11,6 +11,7 @@ const passport = require('passport');
 const passportLocalMongoose = require('passport-local-mongoose');
 
 const app = express();
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 
 
@@ -54,6 +55,20 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 console.log("Your API key is: " + process.env.API_KEY);
+
+
+//we  put our google auth here
+passport.use(new GoogleStrategy({
+        clientID: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
+        callbackURL: "http://localhost:3000/auth/google/secrets"
+    },
+    function(accessToken, refreshToken, profile, cb) {
+        User.findOrCreate({ googleId: profile.id }, function(err, user) {
+            return cb(err, user);
+        });
+    }
+));
 
 app.get("/", function(req, res) {
     res.render("home");
