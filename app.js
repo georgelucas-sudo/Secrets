@@ -43,6 +43,7 @@ const userschema = new mongoose.Schema({
 });
 
 userschema.plugin(passportLocalMongoose);
+userschema.plugin(findOrCreate);
 
 //we create a new local strategy using the passportLocalMongoose
 //we serialize and deserialize the user using passportLocalMongoose
@@ -77,6 +78,8 @@ passport.use(new GoogleStrategy({
 app.get("/", function(req, res) {
     res.render("home");
 });
+//route for the button 
+app.get("/auth/google", passport.authenticate('google', { scope: ["profile"] }));
 
 app.get("/login", function(req, res) {
     res.render("login");
